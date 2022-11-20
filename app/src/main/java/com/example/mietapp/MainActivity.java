@@ -1,40 +1,42 @@
 package com.example.mietapp;
 
-import android.content.ContentValues;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.Environment;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.io.FileOutputStream;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-import java.util.jar.Attributes;
 
 
-import static com.example.mietapp.DataBaseHelper.COLUMN_CUSTOMER_NAME;
 import static com.example.mietapp.DataBaseHelper.COLUMN_ID;
 import static com.example.mietapp.DataBaseHelper.CUSTOMER_TABLE;
 
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        ActivityCompat.requestPermissions(MainActivity.this, new String[] {android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
 
         DataBaseHelper dbHelper = new DataBaseHelper(this);
         mDatabase = dbHelper.getWritableDatabase();
@@ -62,8 +65,8 @@ public class MainActivity extends AppCompatActivity {
 
                 underlayButtons.add(new RecyclerViewSwipeHelper.UnderlayButton(
                         MainActivity.this,
-                        "X",
-                        android.R.drawable.ic_dialog_alert,
+                        "",
+                        R.drawable.icons8_delete_64,
                         Color.parseColor("#FF3C30"),
                         new RecyclerViewSwipeHelper.UnderlayButtonClickListener() {
                             @Override
@@ -77,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
                 underlayButtons.add(new RecyclerViewSwipeHelper.UnderlayButton(
                         MainActivity.this,
-                        "info",
-                        android.R.drawable.ic_dialog_info,
+                        "",
+                        R.drawable.icons8_info_64,
                         Color.parseColor("#FF9502"),
                         new RecyclerViewSwipeHelper.UnderlayButtonClickListener() {
                             @Override
@@ -89,27 +92,25 @@ public class MainActivity extends AppCompatActivity {
                         }
                 ));
 
+                underlayButtons.add(new RecyclerViewSwipeHelper.UnderlayButton(
+                        MainActivity.this,
+                        "",
+                        R.drawable.icons8_print_100,
+                        Color.parseColor("#FFC0CB"),
+                        new RecyclerViewSwipeHelper.UnderlayButtonClickListener() {
+                            @Override
+                            public void onClick(int pos) {
+                                // TODO: OnTransfer
+                                showItemPDF((int) viewHolder.itemView.getTag());
+                            }
+                        }
+                ));
+
             }
         };
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeHelper);
         itemTouchHelper.attachToRecyclerView(list);
-
-
-
-/*        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                removeItem((int) viewHolder.itemView.getTag());
-            }
-        }).attachToRecyclerView(list);
-
- */
 
         findViewById(R.id.neue).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,21 +121,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
     }
 
     public void removeItem(int id) {
         mDatabase.delete(CUSTOMER_TABLE, COLUMN_ID + "=" + id, null);
-
-
-//        File directory =
-//        File mypath =  new File(directory, current);
-        //            Files.deleteIfExists(Paths.get(mypath + id + ".jpg"));
-//            Files.deleteIfExists(Paths.get(mypath + id + ".png"));
-//        mypath.delete();
-//        Log.d(String.valueOf(mypath), "mypath in MainActivity");
-
-
         adapter.swapCursor(getAllItems());
     }
 
@@ -183,37 +173,152 @@ public class MainActivity extends AppCompatActivity {
         i.putExtra("CustomerBemerkung", customer.getBemerkung());
         overridePendingTransition(R.anim.nav_default_pop_enter_anim, R.anim.nav_default_pop_exit_anim);
         startActivity(i);
+    }
+    private void showItemPDF(int id){
 
-/*
+        Cursor oneCursor = mDatabase.rawQuery("SELECT * FROM CUSTOMER_TABLE WHERE ID = '"+id+"'", null);
+        CustomerModel customer = new CustomerModel(null, null, null,null,null,null,null);
 
-//showID.setText(Customer.getId());
+        if (oneCursor.moveToFirst()){
+            do {
+                // Passing values
+                customer.setId(oneCursor.getString(0));
+                customer.setName(oneCursor.getString(1));
+                customer.setHandy(oneCursor.getString(2));
+                customer.setAdresse(oneCursor.getString(3));
+                customer.setVon(oneCursor.getString(4));
+                customer.setBis(oneCursor.getString(5));
+                customer.setBemerkung(oneCursor.getString(6));
+                // Do something Here with values
+            } while(oneCursor.moveToNext());
+        }
+        String ids = customer.getId(), Name = customer.getName(),Handy = customer.getHandy(),Adresse = customer.getAdresse(),Von = customer.getVon(),Bis = customer.getBis(),Bemerkung = customer.getBemerkung();
+        createPDF(ids,Name,Handy,Adresse,Von,Bis,Bemerkung);
+        Log.d(ids, "ids - Show Item PDF");
+    }
 
-//        showID.setText(String.valueOf(ID));
-
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.showinfo, null);
-
-        // create the popup window
-
-        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-        boolean focusable = true; // lets taps outside the popup also dismiss it
-        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-
-        // show the popup window
-        // which view you pass in doesn't matter, it is only used for the window tolken
-        popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
-
-        // dismiss the popup window when touched
-        popupView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                popupWindow.dismiss();
-                return true;
+    private void createPDF(String ids, String Name, String Handy, String Adresse, String Von, String Bis, String Bemerkung) {
+        File directory = null;
+        //if there is no SD card, create new directory objects to make directory on device
+        if (Environment.getExternalStorageState() == null) {
+            //create new file directory object
+            directory = new File(Environment.getDataDirectory()
+                    + "/Data/");
+            File photoDirectory = new File(Environment.getDataDirectory()
+                    + "/Data-Screenshots/");
+            /*
+             * this checks to see if there are any previous test photo files
+             * if there are any photos, they are deleted for the sake of
+             * memory
+             */
+            if (photoDirectory.exists()) {
+                File[] dirFiles = photoDirectory.listFiles();
+                if (dirFiles.length != 0) {
+                    for (int ii = 0; ii <= dirFiles.length; ii++) {
+                        dirFiles[ii].delete();
+                    }
+                }
             }
-        });
-*/
-//        return mDatabase.query(CUSTOMER_TABLE,null, COLUMN_ID = String.valueOf(id),null,null,null,null);
+            // if no directory exists, create new directory
+            if (!directory.exists()) {
+                directory.mkdir();
+            }
+
+            // if phone DOES have sd card
+        } else if (Environment.getExternalStorageState() != null) {
+            // search for directory on SD card
+             directory = new File(Environment.getExternalStorageDirectory()
+                    + "/Mietapp_PDF/");
+            File photoDirectory = new File(
+                    Environment.getExternalStorageDirectory()
+                            + "/Data-Screenshots/");
+            if (photoDirectory.exists()) {
+                File[] dirFiles = photoDirectory.listFiles();
+                if (dirFiles.length > 0) {
+                    for (int ii = 0; ii < dirFiles.length; ii++) {
+                        dirFiles[ii].delete();
+                    }
+                    dirFiles = null;
+                }
+            }
+            // if no directory exists, create new directory to store test
+            // results
+            if (!directory.exists()) {
+                directory.mkdir();
+            }
+        }// end of SD card checking
+
+        PdfDocument myPdf = new PdfDocument();
+        Bitmap logo = BitmapFactory.decodeResource(this.getResources(), R.drawable.logo);
+
+        PdfDocument.PageInfo myPageInfo = new PdfDocument.PageInfo.Builder(300, 600, 1).create();
+        PdfDocument.Page myPage = myPdf.startPage(myPageInfo);
+        Canvas canvas = myPage.getCanvas();
+        Paint myPaint = new Paint();
+        Paint myText = new Paint();
+        myPaint.setColor(Color.parseColor("#FFFFFF"));
+        canvas.drawPaint(myPaint);
+
+        logo = Bitmap.createScaledBitmap(logo,logo.getWidth()/10,logo.getHeight()/10,true);
+
+        canvas.drawBitmap(logo,10,10,null);
+
+
+        Bitmap signo = BitmapFactory.decodeFile("/data/data/com.example.mietapp/app_external_dir/" + ids + ".png");
+
+        int x=20, y=100;
+
+        myPage.getCanvas().drawText("Kundenname:",x,y,myText);
+        myPage.getCanvas().drawText(Name,100+x,y,myText);
+        myPage.getCanvas().drawText("Handynummer:",x,20+y,myText);
+        myPage.getCanvas().drawText(Handy,100+x,20+y,myText);
+        myPage.getCanvas().drawText("Kundenadresse:",x,40+y,myText);
+        myPage.getCanvas().drawText(Adresse,100+x,40+y,myText);
+        myPage.getCanvas().drawText("Abholung:",x,60+y,myText);
+        myPage.getCanvas().drawText(Von, 100+x,60+y,myText);
+        myPage.getCanvas().drawText("Rückgabe:",x,80+y,myText);
+        myPage.getCanvas().drawText(Bis, 100+x,80+y,myText);
+        myPage.getCanvas().drawText("Bemerkung:",x,100+y,myText);
+        myPage.getCanvas().drawText(Bemerkung, 100+x,100+y,myText);
+        myPage.getCanvas().drawText("Unterschrift:",x,220+y,myText);
+        try {
+            signo = Bitmap.createScaledBitmap(signo,signo.getWidth()/10,signo.getHeight()/10,true);
+            canvas.drawBitmap(signo,100,320,null);
+        }
+        catch (Exception e) {
+        System.out.println("Unterschrift Fehler");
+        }
+
+        myPdf.finishPage(myPage);
+
+        Date currentTime = Calendar.getInstance().getTime();
+        String current = Name + "_" + currentTime + ".pdf";
+        Log.d(String.valueOf(directory), "Directory");
+        File myFile = new File(directory, current);
+        try {
+            myPdf.writeTo(new FileOutputStream(myFile));
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        myPdf.close();
+        Log.d(String.valueOf(Name), "PDF-Name");
+        Log.d(String.valueOf(myFile), "PDF-Path");
+        Uri path = FileProvider.getUriForFile(MainActivity.this, getApplicationContext().getPackageName() + ".provider", myFile);
+
+        Intent pdfOpenIntent = new Intent(Intent.ACTION_VIEW);
+        pdfOpenIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        pdfOpenIntent.setClipData(ClipData.newRawUri("", path));
+        pdfOpenIntent.setDataAndType(path, "application/pdf");
+        pdfOpenIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION |  Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        Log.d(String.valueOf(path), "Path");
+
+        try {
+            startActivity(pdfOpenIntent);
+        } catch (ActivityNotFoundException activityNotFoundException) {
+            Toast.makeText(this,"There is no app to load corresponding PDF",Toast.LENGTH_LONG).show();
+
+        }
     }
 
 
@@ -221,38 +326,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, Second.class);
         startActivity(intent);
     }
-/*    private void Showinfo(int id){
-        getOneItem(id);
-
-
-
-        LayoutInflater inflater = (LayoutInflater)
-                getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.showinfo, null);
-
-        // create the popup window
-
-        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-        boolean focusable = true; // lets taps outside the popup also dismiss it
-        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-
-        // show the popup window
-        // which view you pass in doesn't matter, it is only used for the window tolken
-        popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
-
-        // dismiss the popup window when touched
-        popupView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                popupWindow.dismiss();
-                return true;
-            }
-        });
-
-        adapter.swapCursor(getAllItems());
-    }
-*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -269,7 +342,9 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.info_settings) {
+            Intent i = new Intent(getApplicationContext(), Appinfo.class);
+            startActivity(i);
             return true;
         }
 

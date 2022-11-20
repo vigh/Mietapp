@@ -44,11 +44,7 @@ public class Pop extends Activity {
         String Adresse = i.getStringExtra("CustomerAdresse");
         String Bemerkung = i.getStringExtra("CustomerBemerkung");
 
-//        String IDs = getString(IDh);
-//        int IDi=Integer.parseInt(IDs,16);
-
         Log.d(Name, "Name-Pop");
-//        Log.d(getString(IDh), "ID-Pop");
         Log.d(ID,"ID-Pop");
 
         showID.setText(ID);
@@ -60,14 +56,12 @@ public class Pop extends Activity {
         showBemerkung.setText(Bemerkung);
 
         File imgFile = new  File("/data/data/com.example.mietapp/app_external_dir/" + ID + ".png");
-//        File imgFile = new  File("/data/data/com.example.mietapp/app_external_dir/ '\"+ID+\"' .png");
-//        File imgFile = new  File(Environment.getExternalStorageDirectory() + "/data/data/com.example.mietapp/app_external_dir/20.png");
 
         if(imgFile.exists()){
 
             Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
             Signo.setImageBitmap(myBitmap);
-            Log.d(null, "File exists");
+            Log.d(imgFile.getAbsolutePath(), "Unterschift Path");
 
         }
 

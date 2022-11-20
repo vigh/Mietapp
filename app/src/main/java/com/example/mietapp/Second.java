@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Toast;
 import androidx.annotation.RequiresApi;
@@ -19,7 +21,7 @@ import java.util.Calendar;
 public class Second extends AppCompatActivity {
 
     int counter = 0;
-    Button Speichern;
+    Button AGBtext;
     Button getSignature;
     String Name, Handy, Bemerkung, Adresse, Von, Bis, ID;
     TextInputLayout Namebox;
@@ -28,6 +30,7 @@ public class Second extends AppCompatActivity {
     TextInputLayout Adressbox;
     TextInputEditText Vonbox;
     TextInputEditText Bisbox;
+    boolean Check = false;
 
     public static final int SIGNATURE_ACTIVITY = 1;
 
@@ -41,45 +44,55 @@ public class Second extends AppCompatActivity {
         Bemerkungbox = findViewById(R.id.Bemerkungbox);
         Vonbox = findViewById(R.id.Vonbox);
         Bisbox = findViewById(R.id.Bisbox);
-        Speichern = findViewById(R.id.Speichernbox);
         getSignature = findViewById(R.id.signature);
+        CheckBox AGB = findViewById(R.id.AGB);
+        AGBtext = findViewById(R.id.AGBtext);
 
+        AGBtext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getApplicationContext(), PopAGB.class);
+                overridePendingTransition(R.anim.nav_default_pop_enter_anim, R.anim.nav_default_pop_exit_anim);
+                startActivity(i);
+
+            }
+        });
+
+        AGB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Check = !Check;
+            }});
 
         getSignature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Second.this, CaptureSignature.class);
-                startActivityForResult(intent, SIGNATURE_ACTIVITY);
-            }
-        });
+                if (Check){
+                    Intent intent = new Intent(Second.this, CaptureSignature.class);
+                    startActivityForResult(intent, SIGNATURE_ACTIVITY);
 
-        Speichern.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                    counter ++;
+                    Name = Namebox.getEditText().getText().toString().trim();
+                    Handy = Handybox.getEditText().getText().toString().trim();
+                    Adresse = Adressbox.getEditText().getText().toString().trim();
+                    Bemerkung = Bemerkungbox.getEditText().getText().toString().trim();
+                    Bis = Bisbox.getText().toString();
+                    Von = Vonbox.getText().toString();
 
-                counter ++;
-                Name = Namebox.getEditText().getText().toString().trim();
-                Handy = Handybox.getEditText().getText().toString().trim();
-                Adresse = Adressbox.getEditText().getText().toString().trim();
-                Bemerkung = Bemerkungbox.getEditText().getText().toString().trim();
-                Bis = Bisbox.getText().toString();
-                Von = Vonbox.getText().toString();
-
-                CustomerModel customerModel;
-                try{
-                    customerModel = new CustomerModel(ID, Name, Handy,Adresse,Von,Bis,Bemerkung);
-                    Snackbar.make(view, customerModel.toString(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    CustomerModel customerModel;
+                    try{
+                        customerModel = new CustomerModel(ID, Name, Handy,Adresse,Von,Bis,Bemerkung);
+                        Snackbar.make(view, customerModel.toString(), Snackbar.LENGTH_LONG).setAction("Action", null).show();
                     }
 
-                catch (Exception e){
-                    Snackbar.make(view, "Falsche eingaben", Snackbar.LENGTH_SHORT).show();
-                customerModel = new CustomerModel(ID, "Error","Error","Error","Error","Error","Error");
-                }
+                    catch (Exception e){
+                        Snackbar.make(view, "Falsche eingaben", Snackbar.LENGTH_SHORT).show();
+                        customerModel = new CustomerModel(ID, "Error","Error","Error","Error","Error","Error");
+                    }
 
-                DataBaseHelper dataBaseHelper = new DataBaseHelper(Second.this);
-                boolean succes = dataBaseHelper.addOne(customerModel);
-            }
-
+                    DataBaseHelper dataBaseHelper = new DataBaseHelper(Second.this);
+                    boolean succes = dataBaseHelper.addOne(customerModel);
+                }}
         });
 
         Vonbox.setOnClickListener(new View.OnClickListener() {
@@ -122,19 +135,10 @@ public class Second extends AppCompatActivity {
                 }
         });
 
-
         findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Goto1();
-            }
-        });
-
-
-        findViewById(R.id.next).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Goto3();
             }
         });
     }

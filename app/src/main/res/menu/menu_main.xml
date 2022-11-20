@@ -3,11 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.mietapp.MainActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/info_settings"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Impressum"
         app:showAsAction="never" />
-    <item
-        android:title="DEL_db"
-        android:id="@+id/DEL_db"/>
 </menu>

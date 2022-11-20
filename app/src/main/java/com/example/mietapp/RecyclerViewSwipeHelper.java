@@ -260,7 +260,8 @@ public abstract class RecyclerViewSwipeHelper extends ItemTouchHelper.SimpleCall
             icons = new RectF(itemView.getRight() - 4f * width, itemView.getTop() + width, itemView.getRight() - 2.7f * width, itemView.getBottom() - width);
 
             icon = BitmapFactory.decodeResource(context.getResources(), imageResId);
-//            c.drawBitmap(icon, null, icons, p);
+//            c.translate(rect.left + x, rect.top + y);
+            c.drawBitmap(icon,rect.centerX() - (icon.getWidth() / 2), rect.centerY() - (icon.getHeight() / 2), null);
 
             clickRegion = rect;
             this.pos = pos;

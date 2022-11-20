@@ -97,6 +97,22 @@
                 app:errorEnabled="true"/>
         </com.google.android.material.textfield.TextInputLayout>
 
+        <CheckBox
+            android:id="@+id/AGB"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Allgemeine Geschäftsbedingungen zugestimmt"
+            android:checked="false"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/AGBtext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Allgemeine Geschäftsbedingungen"
+
+            />
+
     </LinearLayout>
 
     <LinearLayout
@@ -112,35 +128,16 @@
             android:id="@+id/back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="32dp"
-            android:text="@string/previous" />
+            android:layout_marginStart="0dp"
+            android:layout_marginBottom="0dp"
+            android:text="Zurück" />
 
         <Button
-            android:id="@+id/next"
+            android:id="@+id/signature"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="32dp"
-            android:text="@string/next" />
+            android:text="Unterschrift" />
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/signature"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Get My Signature"
-        app:layout_constraintBottom_toTopOf="@+id/Speichernbox"
-        app:layout_constraintEnd_toEndOf="@+id/linearLayout0"
-        app:layout_constraintStart_toStartOf="@+id/linearLayout0" />
-
-    <Button
-        android:id="@+id/Speichernbox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Speichern"
-
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
