@@ -38,6 +38,7 @@ public class Second extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.second);
+
         Namebox = findViewById(R.id.Namebox);
         Handybox = findViewById(R.id.Handybox);
         Adressbox = findViewById(R.id.Adressebox);

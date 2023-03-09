@@ -14,7 +14,6 @@
         android:requestLegacyExternalStorage="true">
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true">
             <intent-filter>
@@ -25,7 +24,6 @@
         </activity>
         <activity
             android:name=".CaptureSignature"
-            android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true">
             <intent-filter>
@@ -35,7 +33,6 @@
         </activity>
         <activity
             android:name=".Second"
-            android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true">
             <intent-filter>
@@ -46,7 +43,6 @@
         </activity>
         <activity
             android:name=".Third"
-            android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true">
             <intent-filter>
@@ -56,7 +52,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".Pop"
-            android:label="@string/app_name"
             android:theme="@style/AppTheme.CustomTheme"
             android:exported="true">
             <intent-filter>
@@ -64,8 +59,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             </activity>
+        <activity android:name=".Popmail"
+            android:theme="@style/AppTheme.CustomTheme"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".Appinfo"
-            android:label="@string/app_name"
             android:theme="@style/AppTheme.CustomTheme"
             android:exported="true">
             <intent-filter>
@@ -74,7 +76,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".PopAGB"
-            android:label="@string/app_name"
             android:theme="@style/AppTheme.CustomTheme"
             android:exported="true">
             <intent-filter>

@@ -105,6 +105,18 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                 ));
+                underlayButtons.add(new RecyclerViewSwipeHelper.UnderlayButton(
+                        MainActivity.this,
+                        "",
+                        R.drawable.mail,
+                        Color.parseColor("#ffffff"),
+                        new RecyclerViewSwipeHelper.UnderlayButtonClickListener() {
+                            @Override
+                            public void onClick(int pos) {
+                                sendEmail((int) viewHolder.itemView.getTag());
+                            }
+                        }
+                ));
 
             }
         };
@@ -148,7 +160,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (oneCursor.moveToFirst()){
             do {
-                // Passing values
                 customer.setId(oneCursor.getString(0));
                 customer.setName(oneCursor.getString(1));
                 customer.setHandy(oneCursor.getString(2));
@@ -156,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
                 customer.setVon(oneCursor.getString(4));
                 customer.setBis(oneCursor.getString(5));
                 customer.setBemerkung(oneCursor.getString(6));
-                // Do something Here with values
             } while(oneCursor.moveToNext());
         }
         Log.d(String.valueOf(customer.getId()), "ID-MainActivity");
@@ -195,6 +205,34 @@ public class MainActivity extends AppCompatActivity {
         String ids = customer.getId(), Name = customer.getName(),Handy = customer.getHandy(),Adresse = customer.getAdresse(),Von = customer.getVon(),Bis = customer.getBis(),Bemerkung = customer.getBemerkung();
         createPDF(ids,Name,Handy,Adresse,Von,Bis,Bemerkung);
         Log.d(ids, "ids - Show Item PDF");
+    }
+
+    private void sendEmail(int id){
+        Cursor oneCursor = mDatabase.rawQuery("SELECT * FROM CUSTOMER_TABLE WHERE ID = '"+id+"'", null);
+        CustomerModel customer = new CustomerModel(null, null, null,null,null,null,null);
+        if (oneCursor.moveToFirst()){
+            do {
+                // Passing values
+                customer.setId(oneCursor.getString(0));
+                customer.setName(oneCursor.getString(1));
+                customer.setHandy(oneCursor.getString(2));
+                customer.setAdresse(oneCursor.getString(3));
+                customer.setVon(oneCursor.getString(4));
+                customer.setBis(oneCursor.getString(5));
+                customer.setBemerkung(oneCursor.getString(6));
+                // Do something Here with values
+            } while(oneCursor.moveToNext());
+        }
+        Intent i = new Intent(getApplicationContext(), Popmail.class);
+        i.putExtra("CustomerId", customer.getId());
+        i.putExtra("CustomerName", customer.getName());
+        i.putExtra("CustomerHandy", customer.getHandy());
+        i.putExtra("CustomerAdresse", customer.getAdresse());
+        i.putExtra("CustomerVon", customer.getVon());
+        i.putExtra("CustomerBis", customer.getBis());
+        i.putExtra("CustomerBemerkung", customer.getBemerkung());
+        overridePendingTransition(R.anim.nav_default_pop_enter_anim, R.anim.nav_default_pop_exit_anim);
+        startActivity(i);
     }
 
     private void createPDF(String ids, String Name, String Handy, String Adresse, String Von, String Bis, String Bemerkung) {
